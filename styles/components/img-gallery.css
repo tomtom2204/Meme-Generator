@@ -1,0 +1,15 @@
+.list {
+    columns: 100px;
+}
+
+.select-img-container{
+    display: grid;
+    place-content: center;
+    width: 100%;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.select-img-container img{
+    border-radius: 1.25em;
+}

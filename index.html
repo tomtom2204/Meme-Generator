@@ -4,19 +4,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <title>Meme Generator</title>
 </head>
 
-<body>
+<body class="main-layout" onload="onInit()">
 
-    <section class="image-gallery"></section>
-    <section class="meme-editor"></section>
+    <header class="main-header main-layout full">
+        <nav class="main-nav-container grid space-between align-center flow-column">
+            <div class="logo "><span>M</span>eme <span>G</span>enera<span>t</span>or</div>
+            <div class="main-nav">
+                <ul class="clean-list grid flow-column">
+                    <li class="mega-rounded"><a onclick="onMenuItemClick(this)" href="#"
+                            class="menu-item active">Gallery</a></li>
+                    <li class="mega-rounded"><a onclick="onMenuItemClick(this)" href="#" class="menu-item ">Meme Editor</a></li>
+                    <li class="mega-rounded"><a onclick="onMenuItemClick(this)" href="#" class="menu-item">My Memes</a>
+                    </li>
+                    <li class="mega-rounded"><a onclick="onMenuItemClick(this)" href="#" class="menu-item">About</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- hamburger menu -->
+            <button class="btn-toggle-menu" onclick="toggleMenu()">
+                <div class="hamburger-lines">
+                    <span class="line line1"></span>
+                    <span class="line line2"></span>
+                    <span class="line line3"></span>
+                </div>
+            </button>
+        </nav>
+    </header>
+    <main class="main-container">
+
+
+        <section class="image-gallery ">
+            <h2>Select an image...</h2>
+            <section class="list select-img-container">
+            </section>
+        </section>
+
+        <section class="meme-editor hidden">
+            <section class="editor-layout">
+                <div class="canvas-container">
+                    <canvas onclick="selectItem(event)">
+
+                    </canvas>
+                </div>
+
+                <div class="editor-layout-panel flex align-center">
+                    <input class="line-input" type="text" oninput="onInput(this)" onkeydown="handleKeyPress(event)"
+                        onblur="outOfFocus()" placeholder="Insert text here..."> </input>
+                    <div class=" top-btm panel">
+                        <img class="panel-btm" onclick="onSwitchLine()" src="images\buttons\line-selector.png" alt="">
+                        <img class="panel-btm" onclick="onAddLine()" src="images\buttons\add.png" alt="">
+                        <img class="panel-btm" src="images\buttons\delete.png" alt="">
+                    </div>
+                    <div class="txt-editor rounded">
+
+                        <!-- First row -->
+                        <div class="row-1">
+                            <div class="edit-cell" onclick="onIncreaseFont()"> <i class="fa-solid fa-a"></i> <i class="fa-solid fa-plus"></i>
+                            </div>
+                            <div class="edit-cell" onclick="onDecreaseFont()"> <i class="fa-solid fa-a"></i> <i class="fa-solid fa-minus"></i>
+                            </div>
+                            <div class="edit-cell"> <i class="fa-solid fa-align-left"></i> </div>
+                            <div class="edit-cell"> <i class="fa-solid fa-align-center"></i> </div>
+                            <div class="edit-cell"> <i class="fa-solid fa-align-right"></i> </div>
+                        </div>
+
+                        <!-- Second row -->
+                        <div class="row-2">
+                            <div class="edit-cell-wide">
+                                <select class="rounded">
+                                    <option>test </option>
+                                </select>
+                            </div>
+                            
+                            <div class="edit-cell" class="color-picker-btn" style="position:relative" onclick="onSetFillColor()">
+                                <input type="color" name="color-picker-fill"  class="color-picker brush" value="#FFFFFF" />
+                                <i class="fa-solid fa-brush"></i>
+                            </div>
+
+                            <div class="edit-cell" class="color-picker-btn" style="position:relative" onclick="onSetStrokeColor()">
+                                <input type="color" name="color-picker-stroke"  class="color-picker stroke" value="#000000" />
+                                <i class="fa-solid fa-s"></i>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="buttom-btm panel">
+                        <img class="panel-action-btm" src="images\buttons\Save.png" alt="">
+                        <img class="panel-action-btm" src="images\buttons\share.png" alt="">
+                        <a href="#" onclick="downloadCanvas(this)"><img class="panel-action-btm"
+                                src="images/buttons/Download.png"></a> 
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section class="my-mems">
+
+        </section>
+
+        <section class="about hidden">
+
+            <h1>About Ultimate Meme Generator</h1>
+            <p>
+                Welcome to the Ultimate Meme Generator—your one-stop shop for creating hilarious, relatable, and
+                viral-worthy memes! Whether you're a meme enthusiast, content creator, or just someone who loves
+                spreading laughs, you've come to the right place.
+            </p>
+
+            <h2>Why We’re the Ultimate Meme Tool</h2>
+
+            <p>At the Ultimate Meme Generator, we believe that creativity shouldn’t be limited by complicated software.
+                We’ve designed a simple, intuitive, and powerful platform that puts meme-making at your fingertips. Our
+                tool offers a rich variety of features, so whether you're making classic image macros or customizing
+                your own format, you'll find everything you need right here.</p>
+
+            <h3>Key Features:</h3>
+
+            <ul>
+                <li>
+                    Easy-to-Use Editor: Our drag-and-drop editor makes it effortless to add text, adjust font sizes, and
+                    move elements around.
+                </li>
+                <li>
+                    Instant Downloads: No sign-up required! Generate your meme and download it instantly in just a few
+                    clicks.
+                </li>
+                <li>
+                    Customizable Everything: Edit fonts, colors, sizes, and even add stickers for a personalized touch.
+                </li>
+                <li>
+                    Mobile-Friendly: Whether you’re on a desktop or mobile, our platform adapts to make meme creation
+                    smooth and easy on any device.
+                </li>
+            </ul>
+        </section>
+    </main>
+
+
+    <div class="modal flex align-center absolute" onclick="event.stopPropagation()">
+
+        <div class="modal-btn-container ">
+            <button class="btn" onclick="toggleModal()">Close</button>
+            <button class="btn" type="submit">Submit</button>
+        </div>
+    </div>
 
     <script src="js/main.js"></script>
-    <script src="js/meme.service.js"></script>
-    <script src="js/meme.controler.js"></script>
-    
+    <script src="js/services/meme.service.js"></script>
+    <script src="js/controlers/gallery.controller.js"></script>
+    <script src="js/controlers/meme.controler.js"></script>
 </body>
 
 </html>
