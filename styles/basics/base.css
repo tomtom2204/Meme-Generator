@@ -1,13 +1,20 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
 }
 
 
 
 html {
     font-family: eurofurence, serif;
-    color: var(--clrPrimary);
+    color: var(--clrPrimary7);
     line-height: 1.25rem;
+}
+
+canvas {
+    font-family: impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif, serif;
 }
 
 h1,
@@ -20,11 +27,16 @@ h6 {
     margin: 0 0 1em;
 }
 
+h2{
+    font-size: 2em;
+}
+
 p {
     margin: 0 0 1em;
 }
 
 body {
+    background-color: var(--clrPrimary1);
     margin: 0;
 }
 
@@ -48,14 +60,20 @@ a {
 /* buttons */
 
 .btn {
-    letter-spacing: 0.03em;
-    color: var(--clrPrimary-2);
-    background-color: white;
-    border: 2px solid var(--clrPrimary-2);
-    padding: 0.625em 1.25em;
-    font-size: 1em;
+    
+    background-color: #85c6a9; /* Greenish background color */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px; /* Rounded corners */
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slight shadow for a 3D effect */
+    transition: background-color 0.3s ease;
+    font-size: 1.5em;
     font-family: inherit;
     cursor: pointer;
+    color: var(--clrPrimary-2);
+    margin: 0.5em;
 
     transition:
         color 0.3s,
@@ -66,9 +84,30 @@ a {
 .btn:hover {
     color: var(--clrSecondary);
     border-color: var(--clrSecondary);
+    background-color: #72b296; 
+}
+
+.btn.disabled {
+    background-color: gray;
+    color: rgb(189, 181, 181);
 }
 
 
+
+label {
+ font-size: 2em;
+}
+
 .mega-rounded {
     border-radius: 50%;
+}
+
+option {
+    text-transform: uppercase;
+    color: var(--clrPrimary1)
+}
+
+input {
+    border-radius: 1.5em;
+    font-size: 1.5em;
 }

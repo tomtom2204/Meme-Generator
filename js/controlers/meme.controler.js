@@ -1,71 +1,25 @@
 'use strict'
 
+const HIGHLIGHTED_DIFF = 20
 var gElCanvas
 var gCtx
 
+function renderMeme(meme) {
 
-function onInit() {
-    gElCanvas = document.querySelector('canvas')
-    gCtx = gElCanvas.getContext('2d')
-    resizeCanvas()
-    renderGallery()
-    window.addEventListener('resize', resizeCanvas)
 
-}
-
-function resizeCanvas() {
-    const elContainer = document.querySelector('.canvas-container')
-    // Changing the canvas dimension clears the canvas
-    gElCanvas.width = elContainer.clientWidth - 10
-
-    renderMeme()
-}
-
-function downloadCanvas(elLink) {
-    const dataUrl = gElCanvas.toDataURL()
-    elLink.href = dataUrl
-    // Set a name for the downloaded file
-    elLink.download = 'my-img'
-}
-
-function renderMeme() {
-
-    const currentMeme = getMeme()
-
-    const text = currentMeme.lines.length ? currentMeme.lines[0].txt : ''
 
     const elImg = new Image()
-    elImg.src = gImgs.find(img => img.id === currentMeme.selectedImgId).url
+    elImg.src = gImgs.find(img => img.id === meme.selectedImgId).url
 
     elImg.onload = () => {
         coverCanvasWithImg(elImg)
-        currentMeme.lines.forEach((line, idx) => {
-            let linePos = getLinePos(idx)
-            drawText(line.txt, linePos.x, linePos.y, idx)
+        meme.lines.forEach((line, idx) => {
+            document.fonts.load(`${line.size * 2}px ${line.font}`).then(() => {
+                drawText(line);
+            });
+            if (isSelected(idx)) drawRect(idx, line.size)
 
         })
-    }
-}
-
-function getLinePos(lineNum) {
-
-    let y
-
-    switch (lineNum) {
-        case 0:
-            y = 50
-            break
-        case 1:
-            y = gElCanvas.height - 50
-            break
-        default:
-            y = gElCanvas.height / 2
-            break
-    }
-
-    return {
-        x: gElCanvas.width / 2,
-        y
     }
 }
 
@@ -79,6 +33,8 @@ function coverCanvasWithImg(elImg) {
 function handleKeyPress(ev) {
     if (ev.key === "Enter") {
         ev.preventDefault()
+        setLineSelected(-1)
+        renderMeme(getMeme())
         outOfFocus()
     }
 }
@@ -93,42 +49,33 @@ function resizeCanvas() {
     const elContainer = document.querySelector('.canvas-container')
     // Changing the canvas dimension clears the canvas
     gElCanvas.width = elContainer.clientWidth - 10
-    if (gMeme) renderMeme()
-}
-
-// cool X btn :)
-function toggleMenu() {
-    document.body.classList.toggle("menu-open")
+    if (gMeme) renderMeme(getMeme())
 }
 
 
-function drawText(text, x, y, selectedLineIdx) {
-    gCtx.lineWidth = 1
-    gCtx.strokeStyle = getStrokeStyle()
-    gCtx.fillStyle = getFillStyle()
-    gCtx.font = `${getFontSize(selectedLineIdx)}px Arial`
-    gCtx.textAlign = 'center'
-    gCtx.textBaseline = 'middle'
-    gCtx.fillText(text, x, y)
-    gCtx.strokeText(text, x, y)
+function drawText(line, ctx = gCtx) {
+
+    const { txt, size, strokeColor, fillColor, pos, font } = line
+
+    ctx.lineWidth = 2
+    ctx.strokeStyle = strokeColor
+    ctx.fillStyle = fillColor
+    ctx.font = `${size * 2}px ${font}`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(txt, pos.x, pos.y)
+    ctx.strokeText(txt, pos.x, pos.y)
 }
 
-function getStrokeStyle() {
-    return document.querySelector('input[name="color-picker-stroke"]').value
-}
-
-function getFillStyle() {
-    return document.querySelector('input[name="color-picker-fill"]').value
-}
 
 function onIncreaseFont() {
     setFontSize(2)
-    renderMeme()
+    renderMeme(getMeme())
 }
 
 function onDecreaseFont() {
     setFontSize(-2)
-    renderMeme()
+    renderMeme(getMeme())
 }
 
 function onAddLine() {
@@ -137,11 +84,12 @@ function onAddLine() {
 
 function onSwitchLine() {
     switchLine()
+    renderMeme(getMeme())
 }
 
 function onInput(elInput) {
     setLineTxt(elInput.value)
-    renderMeme()
+    renderMeme(getMeme())
 }
 
 function downloadCanvas(elLink) {
@@ -151,19 +99,167 @@ function downloadCanvas(elLink) {
     elLink.download = 'my-img'
 }
 
+const fillColorPicker = document.querySelector('input[name="color-picker-fill"]')
+fillColorPicker.addEventListener('input', function () {
+    updateFillColor(fillColorPicker.value)
+    renderMeme(getMeme())
+})
 
 function onSetFillColor() {
     document.querySelector('.brush').click()
 }
 
-
+const strokeColorPicker = document.querySelector('input[name="color-picker-stroke"]')
+strokeColorPicker.addEventListener('input', function () {
+    updateStrokeColor(strokeColorPicker.value)
+    renderMeme(getMeme())
+})
 function onSetStrokeColor() {
     document.querySelector('.stroke').click()
 }
 
+function selectItem(ev) {
 
-function selectItem(ev) { //Todo
+    const { offsetY } = ev
+
+    const clickedLine = gMeme.lines.findIndex(line => {
+        return (
+            line.pos.y - HIGHLIGHTED_DIFF <= offsetY &&
+            offsetY <= line.pos.y + HIGHLIGHTED_DIFF
+        )
+    })
+
+    setLineSelected(clickedLine)
+
+    renderMeme(getMeme())
+}
+
+
+function drawRect(lineNum, size) {
+    const y = getLinePos(lineNum).y
+    gCtx.beginPath()
+    gCtx.strokeStyle = 'yellow'
+    gCtx.lineWidth = 3
+    gCtx.rect(5, y - (size), (gElCanvas.width - 10), size * 2)
+    gCtx.stroke()
 
 }
 
+function onLeftAlignment() {
+    const x = getTextLength() * getTextSize() / 2
+    setLineAlignment(x)
+    renderMeme(getMeme())
+}
+
+function onCenterAlignment() {
+    const x = gElCanvas.width / 2
+    setLineAlignment(x)
+    renderMeme(getMeme())
+}
+
+function onRightAlignment() {
+    const x = gElCanvas.width - (getTextLength() * getTextSize() / 2)
+    setLineAlignment(x)
+    renderMeme(getMeme())
+}
+
+function onFontSelected() {
+    setFont(document.querySelector('.font-type').value)
+    renderMeme(getMeme())
+}
+
+function handleCanvasKeyPress(ev) {
+    
+    const idx = getSelectedLineIdx()
+    if (idx > -1) {
+        const line = getMeme().lines[idx]
+        if (ev.key === "ArrowDown") {
+            ev.preventDefault()
+            line.pos.y += line.size / 4
+        }
+        if (ev.key === "ArrowUp") {
+            ev.preventDefault()
+            line.pos.y -= line.size / 4
+        }
+        renderMeme(getMeme())
+    }
+}
+
+function onDeleteLine() {
+    const idx = getSelectedLineIdx()
+    if (idx > -1) {
+        getMeme().lines.splice(idx, 1)
+        renderMeme(getMeme())
+    }
+}
+
+function onSave() {
+    save()
+}
+
+function renderMemes() {
+    const memes = getMemes()
+    let ctx
+    let strHTML = ''
+    const elMyMems = document.querySelector('.my-mems div')
+    
+    memes.forEach((meme) => {
+        strHTML +=`<canvas data-id="${meme.id}" onclick="selectmeme(event)">
+                    </canvas>`
+    })
+    elMyMems.innerHTML = strHTML
+
+    memes.forEach((meme, idx) => {
+        const elImg = new Image()
+        elImg.src = gImgs.find(img => img.id === meme.selectedImgId).url
+
+        elImg.onload = () => {
+            let canvas = elMyMems.querySelector(`[data-id="${meme.id}"]`) 
+            ctx = canvas.getContext('2d')
+            canvas.height = (elImg.naturalHeight / elImg.naturalWidth) * canvas.width
+            ctx.drawImage(elImg, 0, 0, canvas.width, canvas.height)
+            meme.lines.forEach((line, idx) => {
+                document.fonts.load(`${line.size * 2}px ${line.font}`).then(() => {
+                    drawText(line, ctx);
+                });
+                if (isSelected(idx)) drawRect(idx, line.size)
+
+            })
+        }
+    }
+    )
+}
+
+
+function onAddSticker(sticker){
+    addLine(sticker)
+    renderMeme(getMeme())
+}
+
+function onUploadToFB(url) {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&t=${url}`)
+}
+
+
+
+function onUploadImg(ev) {
+    ev.preventDefault()
+    const canvasData = gElCanvas.toDataURL('image/jpeg')
+
+    // After a successful upload, allow the user to share on Facebook
+    function onSuccess(uploadedImgUrl) {
+        const encodedUploadedImgUrl = encodeURIComponent(uploadedImgUrl)
+        document.querySelector('.share-container').innerHTML = `
+            <a href="${uploadedImgUrl}">Image Url</a>
+            <p>Image url: ${uploadedImgUrl}</p>
+           
+            <button class="btn-facebook" target="_blank" onclick="onUploadToFB('${encodedUploadedImgUrl}')">
+                Share on Facebook  
+            </button>
+        `
+        document.querySelector('.share-button').classList.remove('disabled')
+    }
+
+    uploadImg(canvasData, onSuccess)
+}
 
